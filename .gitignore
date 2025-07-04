@@ -1,0 +1,45 @@
+# 依存関係
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 環境変数
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ログファイル
+logs/
+*.log
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# IDE設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# テスト関連
+coverage/
+.nyc_output/
+
+# ビルド出力
+dist/
+build/
+
+# 一時ファイル
+*.tmp
+*.temp
+.cache/
+
+# PM2
+.pm2/
+pm2.json
+ecosystem.config.js

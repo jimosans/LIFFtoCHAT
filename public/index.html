@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF Chat Service</title>
+    
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.22.0/sdk.js"></script>
+    
+    <style>
+        /* リセットCSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 基本スタイル */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* コンテナ */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ヘッダー */
+        .header {
+            background-color: #00B900;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ステータスカード */
+        .status-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .status-value {
+            color: #333;
+        }
+
+        .status-value.success {
+            color: #00B900;
+            font-weight: 600;
+        }
+
+        .status-value.error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .status-value.pending {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        /* ボタン */
+        .button {
+            background-color: #00B900;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .button:hover {
+            background-color: #009900;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .button.secondary {
+            background-color: #6c757d;
+        }
+
+        .button.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* ローディング */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #00B900;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* エラーメッセージ */
+        .error-message {
+            background-color: #fee;
+            color: #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* 成功メッセージ */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        /* チャットコンテナ */
+        .chat-container {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: none;
+            position: relative;
+            min-height: 500px;
+        }
+
+        .chat-container.active {
+            display: block;
+        }
+
+        .chat-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            min-height: 500px;
+        }
+
+        /* ユーザー情報 */
+        .user-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .user-info.active {
+            display: block;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        /* 課金未済メッセージ */
+        .payment-required {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+            text-align: center;
+            display: none;
+        }
+
+        .payment-required.active {
+            display: block;
+        }
+
+        .payment-required h3 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        /* デバッグ情報（開発時のみ表示） */
+        .debug-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+
+        .debug-info.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <h1>LIFF Chat Service</h1>
+            <p>LINEアカウントでログインしてチャットをご利用ください</p>
+        </div>
+
+        <!-- ステータス表示 -->
+        <div class="status-card">
+            <div class="status-item">
+                <span class="status-label">LIFF初期化:</span>
+                <span id="liff-status" class="status-value pending">初期化中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">ログイン状態:</span>
+                <span id="login-status" class="status-value pending">確認中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">認証状態:</span>
+                <span id="auth-status" class="status-value pending">未認証</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">課金状態:</span>
+                <span id="payment-status" class="status-value pending">未確認</span>
+            </div>
+        </div>
+
+        <!-- ユーザー情報 -->
+        <div id="user-info" class="user-info">
+            <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+            <span id="user-name" class="user-name"></span>
+        </div>
+
+        <!-- エラーメッセージ -->
+        <div id="error-message" class="error-message"></div>
+
+        <!-- 成功メッセージ -->
+        <div id="success-message" class="success-message"></div>
+
+        <!-- ローディング表示 -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>処理中...</p>
+        </div>
+
+        <!-- 操作ボタン -->
+        <div id="action-buttons">
+            <button id="login-button" class="button" style="display: none;">
+                LINEでログイン
+            </button>
+            <button id="auth-button" class="button" style="display: none;">
+                チャット認証
+            </button>
+            <button id="logout-button" class="button secondary" style="display: none;">
+                ログアウト
+            </button>
+        </div>
+
+        <!-- 課金未済メッセージ -->
+        <div id="payment-required" class="payment-required">
+            <h3>⚠️ 有料サービスです</h3>
+            <p>チャット機能は有料会員限定のサービスです。</p>
+            <p>ご利用には有料プランへの加入が必要です。</p>
+        </div>
+
+        <!-- チャットコンテナ -->
+        <div id="chat-container" class="chat-container">
+            <iframe id="chat-iframe" class="chat-iframe" title="Chat Service"></iframe>
+        </div>
+
+        <!-- デバッグ情報（開発時のみ） -->
+        <div id="debug-info" class="debug-info"></div>
+    </div>
+
+    <script>
+        /**
+         * LIFF Chat Service フロントエンド
+         * 
+         * このスクリプトは以下の処理を行います：
+         * 1. LIFF SDKの初期化
+         * 2. ユーザーのログイン状態確認
+         * 3. IDトークンの取得と認証
+         * 4. チャットの表示
+         */
+
+        // 設定
+        const CONFIG = {
+            // LIFF IDは環境変数またはサーバーから取得することを推奨
+            liffId: '<%= process.env.LINE_LIFF_ID %>', // 実際の値に置き換えてください
+            authEndpoint: '/auth',
+            chatProxyEndpoint: '/chat-proxy',
+            tokenRefreshInterval: 4 * 60 * 1000, // 4分（5分の有効期限に対して余裕を持たせる）
+            debug: false // 本番環境ではfalseに設定
+        };
+
+        // グローバル変数
+        let currentToken = null;
+        let tokenRefreshTimer = null;
+        let userProfile = null;
+
+        // DOM要素の取得
+        const elements = {
+            liffStatus: document.getElementById('liff-status'),
+            loginStatus: document.getElementById('login-status'),
+            authStatus: document.getElementById('auth-status'),
+            paymentStatus: document.getElementById('payment-status'),
+            userInfo: document.getElementById('user-info'),
+            userAvatar: document.getElementById('user-avatar'),
+            userName: document.getElementById('user-name'),
+            errorMessage: document.getElementById('error-message'),
+            successMessage: document.getElementById('success-message'),
+            loading: document.getElementById('loading'),
+            loginButton: document.getElementById('login-button'),
+            authButton: document.getElementById('auth-button'),
+            logoutButton: document.getElementById('logout-button'),
+            paymentRequired: document.getElementById('payment-required'),
+            chatContainer: document.getElementById('chat-container'),
+            chatIframe: document.getElementById('chat-iframe'),
+            debugInfo: document.getElementById('debug-info')
+        };
+
+        /**
+         * デバッグログ出力
+         */
+        function debug(message, data = null) {
+            if (CONFIG.debug) {
+                console.log(`[LIFF Chat] ${message}`, data);
+                const debugInfo = elements.debugInfo;
+                debugInfo.classList.add('active');
+                debugInfo.innerHTML += `<div>${new Date().toISOString()} - ${message} ${data ? JSON.stringify(data) : ''}</div>`;
+            }
+        }
+
+        /**
+         * ローディング表示の制御
+         */
+        function setLoading(isLoading) {
+            if (isLoading) {
+                elements.loading.classList.add('active');
+            } else {
+                elements.loading.classList.remove('active');
+            }
+        }
+
+        /**
+         * エラーメッセージの表示
+         */
+        function showError(message) {
+            elements.errorMessage.textContent = message;
+            elements.errorMessage.classList.add('active');
+            elements.successMessage.classList.remove('active');
+            setTimeout(() => {
+                elements.errorMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        /**
+         * 成功メッセージの表示
+         */
+        function showSuccess(message) {
+            elements.successMessage.textContent = message;
+            elements.successMessage.classList.add('active');
+            elements.errorMessage.classList.remove('active');
+            setTimeout(() => {
+                elements.successMessage.classList.remove('active');
+            }, 3000);
+        }
+
+        /**
+         * ステータスの更新
+         */
+        function updateStatus(elementId, status, value) {
+            const element = elements[elementId];
+            if (element) {
+                element.textContent = value;
+                element.className = `status-value ${status}`;
+            }
+        }
+
+        /**
+         * ユーザー情報の表示
+         */
+        function displayUserInfo(profile) {
+            if (profile) {
+                elements.userAvatar.src = profile.pictureUrl || '/default-avatar.png';
+                elements.userName.textContent = profile.displayName || 'ユーザー';
+                elements.userInfo.classList.add('active');
+            } else {
+                elements.userInfo.classList.remove('active');
+            }
+        }
+
+        /**
+         * LIFF初期化
+         */
+        async function initializeLiff() {
+            try {
+                debug('LIFF初期化開始');
+                setLoading(true);
+
+                // LIFF初期化
+                await liff.init({ 
+                    liffId: CONFIG.liffId,
+                    withLoginOnExternalBrowser: true // 外部ブラウザでのログインを許可
+                });
+
+                debug('LIFF初期化完了');
+                updateStatus('liffStatus', 'success', '初期化完了');
+
+                // ログイン状態の確認
+                if (liff.isLoggedIn()) {
+                    debug('ユーザーはログイン済み');
+                    updateStatus('loginStatus', 'success', 'ログイン済み');
+                    elements.loginButton.style.display = 'none';
+                    elements.authButton.style.display = 'block';
+                    elements.logoutButton.style.display = 'block';
+
+                    // プロフィール情報の取得
+                    try {
+                        userProfile = await liff.getProfile();
+                        debug('プロフィール取得成功', userProfile);
+                        displayUserInfo(userProfile);
+                    } catch (error) {
+                        console.error('プロフィール取得エラー:', error);
+                    }
+
+                    // 自動認証を試みる
+                    await authenticateUser();
+
+                } else {
+                    debug('ユーザーは未ログイン');
+                    updateStatus('loginStatus', 'error', '未ログイン');
+                    elements.loginButton.style.display = 'block';
+                    elements.authButton.style.display = 'none';
+                    elements.logoutButton.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('LIFF初期化エラー:', error);
+                updateStatus('liffStatus', 'error', '初期化失敗');
+                showError('LIFF初期化に失敗しました。ページを再読み込みしてください。');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        /**
+         * ログイン処理
+         */
+        function login() {
+            debug('ログイン処理開始');
+            liff.login();
+        }
+
+        /**
+         * ログアウト処理
+         */
+        function logout() {
+            debug('ログアウト処理開始');
+            if (confirm('ログアウトしますか？')) {
+                // トークンのクリア
+                currentToken = null;
+                if (tokenRefreshTimer) {
+                    clearInterval(tokenRefreshTimer);
+                    tokenRefreshTimer = null;
+                }
+
+                // チャットの非表示
+                elements.chatContainer.classList.remove('active');
+
+                // LIFFログアウト
+                liff.logout();
+                window.location.reload();
+            }
+        }
+
+        /**
+         * ユーザー認証
+         */
+        async function authenticateUser() {
+            try {
+                debug('認証処理開始');
+                setLoading(true);
+                updateStatus('authStatus', 'pending', '認証中...');
+
+                // IDトークンの取得
+                const idToken = await liff.getIDToken();
+                if (!idToken) {
+                    throw new Error('IDトークンの取得に失敗しました');
+                }
+                debug('IDトークン取得成功');
+
+                // 認証APIへのリクエスト
+                const response = await fetch(CONFIG.authEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ idToken })
+                });
+
+                const data = await response.json();
+                debug('認証レスポンス', data);
+
+                if (!response.ok) {
+                    throw new Error(data.message || '認証に失敗しました');
+                }
+
+                if (data.success && data.token) {
+                    // 認証成功
+                    currentToken = data.token;
+                    updateStatus('authStatus', 'success', '認証済み');
+                    updateStatus('paymentStatus', 'success', '有料会員');
+                    showSuccess('認証に成功しました');
+
+                    // チャットの表示
+                    displayChat();
+
+                    // トークン自動更新の設定
+                    setupTokenRefresh();
+
+                } else if (data.isPaid === false) {
+                    // 課金未済
+                    updateStatus('authStatus', 'error', '認証失敗');
+                    updateStatus('paymentStatus', 'error', '未課金');
+                    elements.paymentRequired.classList.add('active');
+                    showError('チャット機能は有料会員限定です');
+                } else {
+                    throw new Error('予期しないレスポンス形式');
+                }
+
+            } catch (error) {
+                console.error('認証エラー:', error);
+                updateStatus('authStatus', 'error', '認証失敗');
+                showError(error.message || '認証処理中にエラーが発生しました');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        /**
+         * チャットの表示
+         */
+        function displayChat() {
+            if (!currentToken) {
+                showError('認証トークンがありません');
+                return;
+            }
+
+            debug('チャット表示開始');
+
+            // チャットURLの構築
+            const chatUrl = `${CONFIG.chatProxyEndpoint}?token=${encodeURIComponent(currentToken)}`;
+            
+            // iframeに設定
+            elements.chatIframe.src = chatUrl;
+            elements.chatContainer.classList.add('active');
+            elements.paymentRequired.classList.remove('active');
+
+            debug('チャット表示完了', { url: chatUrl });
+        }
+
+        /**
+         * トークン自動更新の設定
+         */
+        function setupTokenRefresh() {
+            // 既存のタイマーをクリア
+            if (tokenRefreshTimer) {
+                clearInterval(tokenRefreshTimer);
+            }
+
+            // 新しいタイマーを設定
+            tokenRefreshTimer = setInterval(async () => {
+                debug('トークン更新処理開始');
+                try {
+                    await authenticateUser();
+                } catch (error) {
+                    console.error('トークン更新エラー:', error);
+                    showError('認証の更新に失敗しました。再度ログインしてください。');
+                }
+            }, CONFIG.tokenRefreshInterval);
+
+            debug('トークン自動更新設定完了');
+        }
+
+        /**
+         * イベントリスナーの設定
+         */
+        function setupEventListeners() {
+            elements.loginButton.addEventListener('click', login);
+            elements.authButton.addEventListener('click', authenticateUser);
+            elements.logoutButton.addEventListener('click', logout);
+
+            // iframeエラーハンドリング
+            elements.chatIframe.addEventListener('error', (event) => {
+                console.error('iframeエラー:', event);
+                showError('チャットの読み込みに失敗しました');
+            });
+
+            // ページ離脱時の処理
+            window.addEventListener('beforeunload', () => {
+                if (tokenRefreshTimer) {
+                    clearInterval(tokenRefreshTimer);
+                }
+            });
+        }
+
+        /**
+         * アプリケーションの初期化
+         */
+        async function init() {
+            debug('アプリケーション初期化開始');
+
+            // 開発環境の場合、LIFF IDをプロンプトで入力可能にする
+            if (CONFIG.debug && (!CONFIG.liffId || CONFIG.liffId.includes('<%='))) {
+                CONFIG.liffId = prompt('LIFF IDを入力してください:') || '';
+            }
+
+            // LIFF IDが設定されていない場合はエラー
+            if (!CONFIG.liffId || CONFIG.liffId.includes('<%=')) {
+                showError('LIFF IDが設定されていません。管理者にお問い合わせください。');
+                updateStatus('liffStatus', 'error', '設定エラー');
+                return;
+            }
+
+            // イベントリスナーの設定
+            setupEventListeners();
+
+            // LIFF初期化
+            await initializeLiff();
+        }
+
+        // DOMContentLoaded後に初期化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
