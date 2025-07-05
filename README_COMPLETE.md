@@ -40,6 +40,13 @@ JWT（JSON Web Token）完全ガイド
 - セキュリティベストプラクティス
 - デバッグ・トラブルシューティング方法
 
+### 6. [DIFY_SETUP_GUIDE.md](./DIFY_SETUP_GUIDE.md)
+Difyチャット設定ガイド
+- Difyチャットボットの作成方法
+- プライベート設定（非公開）の方法
+- API統合とiframe埋め込みの選択
+- セキュリティ設定とベストプラクティス
+
 ## 🎯 プロジェクト概要
 
 LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JWTトークンベースのチャットプロキシサービスの完全な実装例です。
@@ -241,6 +248,9 @@ A: [JWT_GUIDE.md](./JWT_GUIDE.md) でJWTの基本から実装まで詳しく解�
 
 **Q: 認証後にチャットが表示されない**
 A: JWTトークンの有効期限、DIFY_CHAT_URLの設定を確認してください。
+
+**Q: Difyチャットを非公開にする方法は？**
+A: [DIFY_SETUP_GUIDE.md](./DIFY_SETUP_GUIDE.md) でプライベート設定の方法を詳しく説明しています。
 
 **Q: CORS エラーが発生する**
 A: ALLOWED_ORIGINS 環境変数に許可するオリジンを追加してください。

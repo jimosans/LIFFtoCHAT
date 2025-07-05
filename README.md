@@ -5,6 +5,7 @@ LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JW
 > 📚 **関連ドキュメント**
 > - [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) - LINE Developersの設定方法
 > - [JWT_GUIDE.md](./JWT_GUIDE.md) - JWTの詳細解説
+> - [DIFY_SETUP_GUIDE.md](./DIFY_SETUP_GUIDE.md) - Difyチャットの設定方法
 > - [GUIDELINE.md](./GUIDELINE.md) - 開発・運用ガイドライン
 > - [FLOWCHART.md](./FLOWCHART.md) - システムフロー図
 
@@ -101,7 +102,10 @@ NODE_ENV=production
 DIFY_CHAT_URL=https://udify.app/chatbot/xxxx
 ```
 
-> 💡 **ヒント**: LINE関連のID取得方法は [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) を、JWTの詳細は [JWT_GUIDE.md](./JWT_GUIDE.md) を参照してください。
+> 💡 **ヒント**: 
+> - LINE関連のID取得方法は [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) を参照
+> - JWTの詳細は [JWT_GUIDE.md](./JWT_GUIDE.md) を参照
+> - Difyチャットの設定方法は [DIFY_SETUP_GUIDE.md](./DIFY_SETUP_GUIDE.md) を参照
 
 ### 4. LIFF IDの設定
 
