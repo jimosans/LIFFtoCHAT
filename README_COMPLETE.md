@@ -33,6 +33,13 @@ LINE開発者アカウントの設定ガイド
 - LIFF ID の取得方法
 - 詳細な設定手順とスクリーンショット説明
 
+### 5. [JWT_GUIDE.md](./JWT_GUIDE.md)
+JWT（JSON Web Token）完全ガイド
+- JWTの基本概念と構造解説
+- 本システムでの実装詳細
+- セキュリティベストプラクティス
+- デバッグ・トラブルシューティング方法
+
 ## 🎯 プロジェクト概要
 
 LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JWTトークンベースのチャットプロキシサービスの完全な実装例です。
@@ -228,6 +235,9 @@ A: LIFF IDが正しいか、HTTPSで動作しているか確認してくださ�
 
 **Q: LINE ID/Secret/LIFF IDの取得方法が分からない**
 A: [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) に詳細な手順を記載しています。
+
+**Q: JWTの仕組みがよく分からない**
+A: [JWT_GUIDE.md](./JWT_GUIDE.md) でJWTの基本から実装まで詳しく解説しています。
 
 **Q: 認証後にチャットが表示されない**
 A: JWTトークンの有効期限、DIFY_CHAT_URLの設定を確認してください。
