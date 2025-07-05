@@ -26,6 +26,13 @@
 - エラーハンドリング
 - データフロー
 
+### 4. [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md)
+LINE開発者アカウントの設定ガイド
+- LINE Developersアカウント作成
+- Channel ID/Secret の取得方法
+- LIFF ID の取得方法
+- 詳細な設定手順とスクリーンショット説明
+
 ## 🎯 プロジェクト概要
 
 LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JWTトークンベースのチャットプロキシサービスの完全な実装例です。
@@ -59,6 +66,9 @@ LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JW
 - Node.js 14以上
 - LINE Developersアカウント
 - LIFF アプリケーションの作成済み
+
+> 💡 **LINE開発者アカウントの設定が未完了の場合**  
+> [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) を参考に、LINE Channel ID、Channel Secret、LIFF ID を取得してください。
 
 ### 2. インストール
 
@@ -214,7 +224,10 @@ LOG_LEVEL=debug npm run dev
 ## 📝 よくある質問（FAQ）
 
 **Q: LIFF初期化でエラーが発生する**
-A: LIFF IDが正しいか、HTTPSで動作しているか確認してください。
+A: LIFF IDが正しいか、HTTPSで動作しているか確認してください。詳細は [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) を参照。
+
+**Q: LINE ID/Secret/LIFF IDの取得方法が分からない**
+A: [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) に詳細な手順を記載しています。
 
 **Q: 認証後にチャットが表示されない**
 A: JWTトークンの有効期限、DIFY_CHAT_URLの設定を確認してください。
