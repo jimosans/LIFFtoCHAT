@@ -2,6 +2,12 @@
 
 LINE LIFF（LINE Front-end Framework）を使用した認証システムと、JWTトークンベースのチャットプロキシサービスの実装例です。
 
+> 📚 **関連ドキュメント**
+> - [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) - LINE Developersの設定方法
+> - [JWT_GUIDE.md](./JWT_GUIDE.md) - JWTの詳細解説
+> - [GUIDELINE.md](./GUIDELINE.md) - 開発・運用ガイドライン
+> - [FLOWCHART.md](./FLOWCHART.md) - システムフロー図
+
 ## 📋 概要
 
 このシステムは以下の機能を提供します：
@@ -61,16 +67,30 @@ npm install
 cp .env.example .env
 ```
 
-以下の環境変数を設定してください：
+#### JWT_SECRET の生成
+
+JWT_SECRET は強力なランダム文字列である必要があります。以下のコマンドで生成できます：
+
+```bash
+# Node.js を使用した生成（推奨）
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+
+# または OpenSSL を使用
+openssl rand -hex 64
+```
+
+#### 環境変数の設定
+
+生成した値を含めて、以下の環境変数を設定してください：
 
 ```env
-# LINE LIFF Configuration
+# LINE LIFF Configuration（LINE Developersコンソールから取得）
 LINE_CHANNEL_ID=your_line_channel_id_here
 LINE_CHANNEL_SECRET=your_line_channel_secret_here
 LINE_LIFF_ID=your_liff_id_here
 
 # JWT Configuration
-JWT_SECRET=your_strong_jwt_secret_key_here
+JWT_SECRET=生成した64文字以上のランダム文字列をここに貼り付け
 JWT_EXPIRES_IN=5m
 
 # Server Configuration
@@ -80,6 +100,8 @@ NODE_ENV=production
 # Dify Chat Configuration
 DIFY_CHAT_URL=https://udify.app/chatbot/xxxx
 ```
+
+> 💡 **ヒント**: LINE関連のID取得方法は [LINE_SETUP_GUIDE.md](./LINE_SETUP_GUIDE.md) を、JWTの詳細は [JWT_GUIDE.md](./JWT_GUIDE.md) を参照してください。
 
 ### 4. LIFF IDの設定
 
@@ -102,6 +124,19 @@ async function checkPaymentStatus(userId) {
     // 現在は全ユーザーを課金済みとして扱っています
 }
 ```
+
+データベースを使用する場合は、`.env` ファイルに以下を追加：
+
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=liff_auth
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+```
+
+> 💡 **注**: 開発・デモ環境ではデータベースなしでも動作します。本番環境での課金管理にはデータベースまたは外部APIの実装が必要です。
 
 ## 🏃‍♂️ 実行方法
 
@@ -218,11 +253,21 @@ GET /
 
 ### 1. ローカル環境でのテスト
 
-1. サーバーを起動
-2. ブラウザで `http://localhost:3000` にアクセス
-3. LINEでログイン
-4. チャット認証ボタンをクリック
-5. チャットが表示されることを確認
+1. 環境変数が正しく設定されているか確認
+   ```bash
+   # 設定確認（値は表示せず、設定の有無のみ確認）
+   node -e "['LINE_CHANNEL_ID','LINE_CHANNEL_SECRET','LINE_LIFF_ID','JWT_SECRET'].forEach(k => console.log(k + ':', process.env[k] ? '✓ Set' : '✗ Not set'))"
+   ```
+
+2. サーバーを起動
+   ```bash
+   npm start
+   ```
+
+3. ブラウザで `http://localhost:3000` にアクセス
+4. LINEでログイン
+5. チャット認証ボタンをクリック
+6. チャットが表示されることを確認
 
 ### 2. cURLを使用したAPIテスト
 
@@ -256,6 +301,12 @@ curl "http://localhost:3000/chat-proxy?token=YOUR_JWT_TOKEN"
 3. **Helmetミドルウェア**: 各種セキュリティヘッダーの自動設定
 4. **JWT有効期限**: 短期間（5分）の有効期限設定
 5. **HTTPS推奨**: 本番環境ではHTTPS使用を強く推奨
+
+### セキュリティのベストプラクティス
+
+- **JWT_SECRET**: 必ず強力なランダム文字列を使用し、Gitにコミットしない
+- **環境変数**: 本番環境の値は安全に管理し、開発環境と分離する
+- **定期的な更新**: JWT_SECRETは定期的に更新することを推奨
 
 ## 🐛 トラブルシューティング
 
